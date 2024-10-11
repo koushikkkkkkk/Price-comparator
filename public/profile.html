@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color:gray;
+        }
+        .profile-container {
+            background: linear-gradient(to bottom right, #ffffff, #e6e6e6);
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        .profile-container input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .profile-container button {
+            padding: 15px 30px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .profile-container button.edit {
+            background-color: #008CBA;
+        }
+        .profile-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .profile-container label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-container">
+    <h2>User Profile</h2>
+    <form id="profileForm" action="/save-profile" method="post">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" value="<%= user.FirstName %>" readonly>
+        
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" value="<%= user.LastName %>" readonly>
+        
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" value="<%= user.dob %>" readonly>
+        
+        <label for="phno">Phone Number:</label>
+        <input type="text" id="phno" name="phno" value="<%= user.phno %>" readonly>
+        
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" value="<%= user.address %>" readonly>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" value="<%= user.password %>" readonly>
+        
+        <button type="button" class="edit" onclick="enableEditing()">Edit</button>
+        <button type="submit">Save</button>
+    </form>
+</div>
+
+<script>
+function enableEditing() {
+    const form = document.getElementById('profileForm');
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.readOnly = false;
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeM Price Comparison</title>
+    <link href="https://unpkg.com/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>GeM Price Comparison</h1>
+        <div class="icon-container">
+            <div class="notification" id="notificationIcon">
+                <i class='bx bx-bell'></i>
+            </div>
+            <div class="shopping" id="shoppingIcon" onclick="goToCart()">
+                <i class='bx bx-cart'></i>
+            </div>
+            <div class="user" id="userIcon" onclick="goToProfile()">
+                My Profile&emsp;
+            </div>
+            <div class="user" id="userIcon" onclick="logout()">
+                   Logout
+            </div>
+        </div>
+        <button id="favoriteProductsButton" onclick="viewsuggestions()">
+            suggestions
+            <i class='bx bx-heart'></i>
+        </button>
+        
+    </header>
+    <main>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+              <ul class="nav navbar-nav">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact us</a></li>
+                <li><a href="#">FAQs</a></li>
+              </ul>
+            </div>
+          </nav>
+        <div id="productButtons">
+            <button onclick="set('Mobile')">Mobile</button>
+            <button onclick="set('laptop')">Laptop</button>
+            <button onclick="set('Air Conditioner')">Air Conditioner</button>
+            <button onclick="set('Cooler')">Cooler</button>
+            <button onclick="set('Tablet')">Tablet</button>
+            <button onclick="set('Refrigerator')">Refrigerator</button>
+        </div>
+
+        <section id="search">
+            <input type="text" id="productType" placeholder="Enter product type or name">
+            <button onclick="searchProducts()">Search</button>
+            <select id="filter">
+                <option value="name" selected>Name</option>
+                <option value="type">Type</option>
+                <option value="price_gem">Price Gem</option>
+                <option value="price_amazon">Price Amazon</option>
+                <option value="price_flipkart">Price Flipkart</option>
+            </select>
+        </section>
+
+        <section id="results">
+            <!-- Results will be displayed here -->
+        </section>
+
+        <section id="favoriteProducts">
+            <h2>Favorite Products</h2>
+            <div id="favoriteProductsList">
+                <!-- Favorite products will be displayed here -->
+            </div>
+        </section>
+
+        <section id="cart">
+            <h2>Shopping Cart</h2>
+            <p id="totalPrice">Total Price: $0.00</p>
+            <ul id="cartItems">
+                <!-- Cart items will be displayed here -->
+            </ul>
+        </section>
+
+        <div id="reviewsContainer">
+            
+            <!-- Add form for leaving reviews and ratings -->
+        </div>
+    </main>
+
+    <script>
+        const favoriteProducts = [];
+        const cart = [];
+        let shoppingCartCount = 0;
+
+function toggleUserMenu() {
+    const userMenu = document.getElementById('userMenu');
+    if (userMenu.style.display === 'block') {
+        userMenu.style.display = 'none';
+    } else {
+        userMenu.style.display = 'block';
+    }
+}
+
+function goToProfile() {
+    // Implement the profile navigation functionality
+    window.location.href = '/relogin'; // Redirect to the /profile route
+}
+
+
+function logout() {
+    // Implement the logout functionality
+    window.location.href = 'login.html'; // Example redirection
+}
+
+// Optional: Close the user menu when clicking outside of it
+document.addEventListener('click', function(event) {
+    const userMenu = document.getElementById('userMenu');
+    const userIcon = document.getElementById('userIcon');
+    if (!userMenu.contains(event.target) && !userIcon.contains(event.target)) {
+        userMenu.style.display = 'none';
+    }
+});
+
+function set(name){
+                const productType=name;
+                const filter = document.getElementById('filter').value;
+
+            // Clear previous results
+            const resultsSection = document.getElementById('results');
+            resultsSection.innerHTML = '';
+
+            // Send request to API with product type and filter
+            fetch(`/api/products?type=${productType}&filter=${filter}`)
+                .then(response => response.json())
+                .then(products => {
+                    // Process received products and display them
+                    products.forEach(product => {
+                        const productElement = document.createElement('div');
+                        productElement.classList.add('product');
+                        productElement.innerHTML = `
+                            <img src="${product.image}" alt="${product.name}">
+                            <h3>${product.name}</h3>
+                            <p>GeM Price: ${product.price_gem}</p>
+                            <p>Amazon Price: ${product.price_amazon}</p>
+                            <p>Flipkart Price: ${product.price_flipkart}</p>
+                            <div class="button-container">
+                                <div class="add-to-cart-dropdown">
+                                    <button class="add-to-cart-button">Add to Cart</button>
+                                    <div class="add-to-cart-options">
+                                        <button onclick="addToCart('${product.name}', '${product.price_gem}', 'GeM')">Add to Cart (GeM)</button>
+                                        <button onclick="addToCart('${product.name}', '${product.price_amazon}', 'Amazon')">Add to Cart (Amazon)</button>
+                                        <button onclick="addToCart('${product.name}', '${product.price_flipkart}', 'Flipkart')">Add to Cart (Flipkart)</button>
+                                    </div>
+                                </div>
+                                <div class="review-dropdown">
+                                    <button class="review-button add-to-cart-button">Reviews</button>
+                                    <div class="review-options add-to-cart-options">
+                                        <button onclick="writeReviews('${product.name}', '', '')">Write a Review</button>
+                                        <button onclick="displayReviews('${product.name}')">View Reviews</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // Add event listener to the "Add to Cart" button to toggle the dropdown
+                        const addToCartButton = productElement.querySelector('.add-to-cart-button');
+                        const addToCartOptions = productElement.querySelector('.add-to-cart-options');
+                        addToCartButton.addEventListener('click', () => {
+                            addToCartOptions.style.display = addToCartOptions.style.display === 'none' ? 'block' : 'none';
+                        });
+
+                        // Add event listener to the "Review" button to toggle the dropdown
+                        const reviewButton = productElement.querySelector('.review-button');
+                        const reviewOptions = productElement.querySelector('.review-options');
+                        reviewButton.addEventListener('click', () => {
+                            reviewOptions.style.display = reviewOptions.style.display === 'none' ? 'block' : 'none';
+                        });
+
+                        resultsSection.appendChild(productElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                });
+            }
+        // Front-end code
+        function searchProducts() {
+            const productType = document.getElementById('productType').value;
+            
+            const filter = document.getElementById('filter').value;
+
+            // Clear previous results
+            const resultsSection = document.getElementById('results');
+            resultsSection.innerHTML = '';
+
+            // Send request to API with product type and filter
+            fetch(`/api/products?type=${productType}&filter=${filter}`)
+                .then(response => response.json())
+                .then(products => {
+                    // Process received products and display them
+                    products.forEach(product => {
+                        const productElement = document.createElement('div');
+                        productElement.classList.add('product');
+                        productElement.innerHTML = `
+                            <img src="${product.image}" alt="${product.name}">
+                            <h3>${product.name}</h3>
+                            <p>GeM Price: ${product.price_gem}</p>
+                            <p>Amazon Price: ${product.price_amazon}</p>
+                            <p>Flipkart Price: ${product.price_flipkart}</p>
+                            <div class="button-container">
+                                <div class="add-to-cart-dropdown">
+                                    <button class="add-to-cart-button">Add to Cart</button>
+                                    <div class="add-to-cart-options">
+                                        <button onclick="addToCart('${product.name}', '${product.price_gem}', 'GeM', "${product.image}")">Add to Cart (GeM)</button>
+                                        <button onclick="addToCart('${product.name}', '${product.price_amazon}', 'Amazon', "${product.image}")">Add to Cart (Amazon)</button>
+                                        <button onclick="addToCart('${product.name}', '${product.price_flipkart}', 'Flipkart', "${product.image}")">Add to Cart (Flipkart)</button>
+                                    </div>
+                                </div>
+                                <div class="review-dropdown">
+                                    <button class="review-button add-to-cart-button">Reviews</button>
+                                    <div class="review-options add-to-cart-options">
+                                        <button onclick="writeReviews('${product.name}', '', '')">Write a Review</button>
+                                        <button onclick="displayReviews('${product.name}')">View Reviews</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // Add event listener to the "Add to Cart" button to toggle the dropdown
+                        const addToCartButton = productElement.querySelector('.add-to-cart-button');
+                        const addToCartOptions = productElement.querySelector('.add-to-cart-options');
+                        addToCartButton.addEventListener('click', () => {
+                            addToCartOptions.style.display = addToCartOptions.style.display === 'none' ? 'block' : 'none';
+                        });
+
+                        // Add event listener to the "Review" button to toggle the dropdown
+                        const reviewButton = productElement.querySelector('.review-button');
+                        const reviewOptions = productElement.querySelector('.review-options');
+                        reviewButton.addEventListener('click', () => {
+                            reviewOptions.style.display = reviewOptions.style.display === 'none' ? 'block' : 'none';
+                        });
+
+                        resultsSection.appendChild(productElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                });
+        }
+function writeReviews(name, review, rating) {
+    const reviewInput = prompt('Write your review:');
+    const ratingInput = prompt('Rate the product (out of 5):');
+    
+    if (!reviewInput || !ratingInput) {
+        // User canceled or left inputs blank
+        return;
+    }
+
+    fetch('/show-reviews', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            Email: 'user@example.com', // Replace with actual email
+            name: name,
+            review: reviewInput,
+            rating: ratingInput,
+            quantity:1,
+            created_at: new Date().toISOString(), // Current timestamp
+        }),
+    })
+    .then(response => {
+        if (response.ok) {
+            // Review added successfully
+            console.log('Review added successfully');
+            // Update UI or show success message
+            alert('Review added successfully');
+        } else {
+            // Error adding review
+            console.error('Failed to add review');
+            // Show error message to the user
+            alert('Failed to add review. Please try again.');
+        }
+    })
+    .catch(error => {
+        // Network error or other errors
+        console.error('Error adding review:', error);
+        // Show error message to the user
+        alert('Failed to add review. Please try again.');
+    });
+}
+
+function displayReviews(name) {
+    fetch(`/api/reviews?name=${encodeURIComponent(name)}`, {
+        method: 'GET',
+        credentials: 'same-origin' // Include session cookies if needed
+    })
+    .then(response => response.json())
+    .then(reviews => {
+        const reviewsContainer = document.getElementById('reviewsContainer');
+
+        reviewsContainer.innerHTML = ''; // Clear previous reviews
+
+        reviews.forEach(review => {
+            const reviewElement = document.createElement('div');
+            reviewElement.classList.add('review');
+            reviewElement.innerHTML = `
+                <p>Email: ${review.Email}</p>
+                <p><strong>${review.name}</strong></p>
+                <p>Review: ${review.review}</p>
+                <p>Rating: ${review.rating}</p>
+                <p>Quantity: ${review.quantity}</p>
+                <p>Created At: ${review.created_at}</p>
+                <hr>
+            `;
+            reviewsContainer.appendChild(reviewElement);
+        });
+    })
+    .catch(error => console.error('Error fetching reviews:', error));
+}
+
+
+
+
+        
+
+        function viewsuggestions() {
+            window.location.href = 'suggestions.html';
+        }
+        function goToCart() {
+            window.location.href = 'cart.html';
+        }
+        function gotoreviews() {
+            window.location.href = 'reviews.html';
+        }
+
+        // Function to add item to cart
+        // Function to add item to cart
+
+
+
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const totalPriceElement = document.getElementById('totalPrice');
+            cartItems.innerHTML = '';
+            let totalPrice = 0;
+
+            cart.forEach((item, index) => {
+                const cartItem = document.createElement('li');
+                cartItem.innerHTML = `
+                    <span>${item.name} (${item.source}): $${item.price.toFixed(2)}</span>
+                    <button onclick="removeFromCart(${index})">Remove</button>
+                `;
+                cartItems.appendChild(cartItem);
+                totalPrice += item.price;
+            });
+
+            totalPriceElement.textContent = `Total Price: $${totalPrice.toFixed(2)}`;
+           
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        // Function to update shopping cart count in the UI
+
+
+// Function to add item to cart
+function addToCart(name, price, source, image) {
+    console.log('image');
+    // Send request to add item to cart
+    fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            Email: 'user@example.com', // Replace with actual email
+            name: name,
+            price: price,
+            source: source,
+            quantity: 1, // Assuming quantity is always 1 for now
+            created_at: new Date().toISOString(),
+             // Image URL
+        }),
+    })
+    .then(response => {
+        if (response.ok) {
+            // Item added successfully
+            console.log('Item added to cart successfully');
+            alert('Item added to cart successfully');
+        } else {
+            // Error adding item
+            console.error('Failed to add item to cart');
+            alert('Failed to add item to cart. Please try again.');
+        }
+    })
+    .catch(error => {
+        // Network error or other errors
+        console.error('Error adding item to cart:', error);
+        alert('Failed to add item to cart. Please try again.');
+    });
+
+    // Toggle the visibility of the dropdown buttons after a short delay
+    const addToCartOptions = document.querySelector('.add-to-cart-options');
+    addToCartOptions.style.display = 'block';
+    setTimeout(() => {
+        addToCartOptions.style.display = 'none';
+    }, 1000); // Adjust the delay (in milliseconds) as needed
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('favoriteProducts').style.display = 'none';
+    document.getElementById('cart').style.display = 'none';
+
+    // Add event listener to the notification icon
+    const notificationIcon = document.getElementById('notificationIcon');
+    notificationIcon.addEventListener('click', redirectToNotifications);
+});
+
+function redirectToNotifications() {
+    window.location.href = 'notification.html';
+}
+window.onload = viewStoredData;
+  </script>
+</body>
+
+</html>

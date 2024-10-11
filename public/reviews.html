@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Reviews</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Your CSS styles */
+    </style>
+</head>
+<body>
+    <h1>Stored Data</h1>
+    <div id="reviewsContainer"></div>
+
+    <script>
+        // Function to fetch product name and update the product name in the DOM
+        function searchProducts(productType) {
+    // Clear previous results
+    const resultsSection = document.getElementById('results');
+    resultsSection.innerHTML = '';
+
+    // Send request to API with product type
+    fetch(`/api/products?type=${productType}`)
+        .then(response => response.json())
+        .then(products => {
+            // Process received products and display them
+            products.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.classList.add('product');
+                productElement.innerHTML = `
+
+            
+            <button class="add-to-cart-button" onclick="showReviews('${product.name}', '${product.price_gem}', 'GeM')">Reviews</button>
+            <button class="add-to-cart-button" onclick="displayReviews('${product.name}')">Show Reviews</button>
+        
+  
+                `;
+
+                // Add event listener to the "Add to Cart" button to toggle the dropdown
+                const addToCartButton = productElement.querySelector('.add-to-cart-button');
+                const addToCartOptions = productElement.querySelector('.add-to-cart-options');
+                addToCartButton.addEventListener('click', () => {
+                    addToCartOptions.style.display = addToCartOptions.style.display === 'none' ? 'block' : 'none';
+                });
+
+                resultsSection.appendChild(productElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error);
+        });
+}
+function showReviews(name, price, source) {
+    fetch('/show-reviews', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            Email: 'user@example.com', // Replace with actual email
+            name: name,
+            price: price,
+            source: source,
+            quantity: 1, // Assuming quantity is always 1 for now
+            created_at: new Date().toISOString(), // Current timestamp
+        }),
+    })
+    .then(response => {
+        if (response.ok) {
+            // Item added successfully
+            console.log('Item added to cart successfully');
+            // Update shopping cart count
+            shoppingCartCount++;
+            updateShoppingCartCount(shoppingCartCount);
+            // Update UI or show success message
+            viewStoredData();
+        } else {
+            // Error adding item
+            console.error('Failed to add item to cart');
+            // Show error message to the user
+            alert('Failed to add item to cart. Please try again.');
+        }
+    })
+    .catch(error => {
+        // Network error or other errors
+        console.error('Error adding item to cart:', error);
+        // Show error message to the user
+        alert('Failed to add item to cart. Please try again.');
+    });
+
+    // Toggle the visibility of the dropdown buttons after a short delay
+    
+}
+function displayReviews(name) {
+    fetch(`/api/reviews?name=${encodeURIComponent(name)}`, {
+        method: 'GET',
+        credentials: 'same-origin' // Include session cookies if needed
+    })
+    .then(response => response.json())
+    .then(reviews => {
+        const reviewsContainer = document.getElementById('reviewsContainer');
+
+        reviewsContainer.innerHTML = ''; // Clear previous reviews
+
+        reviews.forEach(review => {
+            const reviewElement = document.createElement('div');
+            reviewElement.classList.add('review');
+            reviewElement.innerHTML = `
+                <p><strong>${review.name}</strong></p>
+                <p>Price: ${review.price}</p>
+                <p>Source: ${review.source}</p>
+                <p>Quantity: ${review.quantity}</p>
+                <p>Created At: ${review.created_at}</p>
+            `;
+            reviewsContainer.appendChild(reviewElement);
+        });
+    })
+    .catch(error => console.error('Error fetching reviews:', error));
+}
+
+    </script>
+</body>
+</html>
