@@ -23,17 +23,13 @@ The **Price Comparator System** is a web-based application that allows users to 
 - HTML, CSS, JavaScript
 
 ### Backend:
-- Node.js (or Python/Java for future implementation)
-- Express.js (if using Node.js)
+- Node.js
+- Express.js
 - API Integration for fetching price data
 
 ### Database:
-- MySQL / MongoDB
+- MySQL
 
-### Tools:
-- Docker (for containerization)
-- Kubernetes (for deployment)
-- Ansible (for automation)
 
 ## Installation & Setup
 1. Clone the repository:
